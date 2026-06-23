@@ -1,0 +1,203 @@
+"""
+Script for running MICE inference on the SAM3-masked LoMOE-Bench dataset.
+"""
+import sys
+import argparse
+import torch
+import numpy as np
+from PIL import Image
+from pathlib import Path
+from tqdm import tqdm
+from loguru import logger
+import random
+
+REPO_ROOT = Path(__file__).resolve().parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from flux2.pipeline_flux2_klein import Flux2KleinPipeline
+from flux2.transformer_flux2_klein import Flux2Transformer2DModel, Flux2Attention, Flux2ParallelSelfAttention
+from flux2.attention import get_attention_processors, AttentionSetting
+from lomoe_dataset_mobius import get_lomoe_mobius_dataloader
+
+SEED = 0
+torch.manual_seed(SEED)
+random.seed(SEED)
+np.random.seed(SEED)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = False
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run MICE inference on the SAM3-masked LoMOE-Bench dataset.")
+
+    parser.add_argument("--pretrained_model_name_or_path", type=str, default="black-forest-labs/FLUX.2-klein-4B")
+    parser.add_argument("--dataset_root", type=str, default="/mnt/ssd1/lomoe_bench_sam3",
+                        help="Root directory of the SAM3-masked LoMOE-Bench dataset")
+    parser.add_argument("--output_dir", type=str, default="results_sam3")
+    parser.add_argument("--exp_name", type=str, required=True, help="Experiment name for results subfolder")
+    parser.add_argument("--num_samples", type=int, default=None, help="Limit number of samples (for debugging)")
+    parser.add_argument("--num_inference_steps", type=int, default=4)
+    parser.add_argument("--guidance_scale", type=float, default=1.0)
+    parser.add_argument("--prompt_settings", type=str, default='outer_local_prompts',
+                        choices=['base', 'inner_local_prompts', 'outer_local_prompts', 'outer_local_prompts_smart'])
+    parser.add_argument("--attention_setting", type=str, default='apitasmkernelnonlap',
+                        choices=[s.value for s in AttentionSetting] + [s.name for s in AttentionSetting])
+    parser.add_argument("--bring_area_to_1024_squared", action="store_true")
+    parser.add_argument("--hard_image_attribute_binding_list", type=str, default="0,57",
+                        help="Layer range (start, end) for attention binding")
+    parser.add_argument("--use_masks", action="store_true", help="Use masks instead of bboxes")
+    parser.add_argument("--sigma_scale", type=float, default=0.6)
+    parser.add_argument("--kernel_size", type=int, default=11)
+    parser.add_argument("--temperature", type=float, default=3.0)
+    parser.add_argument("--masking_steps", type=str, default="all",
+                        help="Steps for hard masking, or \"all\"")
+    parser.add_argument("--relaxed_timesteps", type=str, default="soft", choices=["soft", "full"])
+    parser.add_argument("--smooth_P_L", action="store_true")
+    parser.add_argument("--free_latent", action="store_true")
+    parser.add_argument("--free_context", action="store_true")
+    parser.add_argument("--free_LC", action="store_true")
+
+    args = parser.parse_args()
+
+    if args.use_masks:
+        logger.info("Using masks for image attribute binding")
+
+    def str2list(string):
+        return [int(item) for item in string.split(',')]
+
+    steps_list = list(range(0, args.num_inference_steps)) if args.masking_steps == "all" else str2list(args.masking_steps)
+    args.masking_steps = steps_list
+
+    raw_layer_list = str2list(args.hard_image_attribute_binding_list)
+    if len(raw_layer_list) > 0:
+        args.hard_image_attribute_binding_list = list(range(raw_layer_list[0], raw_layer_list[1]))
+    else:
+        args.hard_image_attribute_binding_list = []
+
+    return args
+
+
+def load_pipeline(args, device):
+    logger.info(f"Loading Flux2KleinPipeline from {args.pretrained_model_name_or_path}")
+
+    transformer = Flux2Transformer2DModel.from_pretrained(
+        args.pretrained_model_name_or_path,
+        subfolder="transformer",
+        torch_dtype=torch.bfloat16,
+        low_cpu_mem_usage=False
+    )
+
+    pipe = Flux2KleinPipeline.from_pretrained(
+        args.pretrained_model_name_or_path,
+        transformer=transformer,
+        torch_dtype=torch.bfloat16
+    )
+    pipe.to(device)
+
+    return pipe
+
+
+def main():
+    args = parse_args()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+
+    save_dir = Path(args.output_dir) / f"lomoe_flux2_sam3_{args.exp_name}"
+    save_dir.mkdir(parents=True, exist_ok=True)
+    logger.info(f"Results will be saved to {save_dir}")
+
+    pipe = load_pipeline(args, device)
+
+    attn_proc = None
+    parallel_attn_proc = None
+    logger.info(f"Setting attention processor to {args.attention_setting}")
+    attn_setting_enum = AttentionSetting(args.attention_setting.lower())
+    processors = get_attention_processors(attn_setting_enum, args.sigma_scale, args.kernel_size, args.temperature)
+
+    if isinstance(processors, tuple) and len(processors) == 2:
+        attn_proc, parallel_attn_proc = processors
+        for name, module in pipe.transformer.named_modules():
+            if isinstance(module, Flux2Attention):
+                module.set_processor(attn_proc)
+            elif isinstance(module, Flux2ParallelSelfAttention):
+                module.set_processor(parallel_attn_proc)
+    else:
+        pipe.transformer.set_attn_processor(processors)
+
+    dataloader = get_lomoe_mobius_dataloader(
+        root_dir=args.dataset_root,
+        batch_size=1,
+        shuffle=False,
+        target_size=1024,
+    )
+
+    if args.num_samples:
+        logger.info(f"Limiting to first {args.num_samples} samples")
+
+    logger.info("Starting inference...")
+
+    for i, batch in enumerate(tqdm(dataloader)):
+        if args.num_samples and i >= args.num_samples:
+            break
+
+        for sample in batch:
+            sample_id = sample['sample_id']
+            image = sample['image']
+            original_size = sample['original_size']
+            bboxes = sample['bboxes']
+            masks = sample['masks']
+            prompt_with_breakflag = sample['prompt']
+
+            filename = f"{sample_id}_result.png"
+            save_path = save_dir / filename
+            if save_path.exists():
+                continue
+
+            if attn_proc and hasattr(attn_proc, 'clear_cached_masks'):
+                attn_proc.clear_cached_masks()
+            if parallel_attn_proc and hasattr(parallel_attn_proc, 'clear_cached_masks'):
+                parallel_attn_proc.clear_cached_masks()
+
+            w, h = image.size
+
+            logger.info(f"Processing sample {sample_id}...")
+
+            kwargs = {}
+            if args.use_masks:
+                kwargs['instance_masks_yx'] = masks
+            else:
+                kwargs['instance_bboxes_xyxy_normalized'] = bboxes
+
+            result = pipe(
+                image=image,
+                prompt=prompt_with_breakflag,
+                height=h,
+                width=w,
+                num_inference_steps=args.num_inference_steps,
+                guidance_scale=args.guidance_scale,
+                prompt_settings=args.prompt_settings,
+                attention_setting=args.attention_setting,
+                hard_image_attribute_binding_list=args.hard_image_attribute_binding_list,
+                bring_area_to_1024_squared=args.bring_area_to_1024_squared,
+                generator=torch.Generator(device=device).manual_seed(SEED),
+                hard_masking_steps=args.masking_steps,
+                relaxed_timesteps=args.relaxed_timesteps,
+                attention_kwargs={"smooth_P_L": args.smooth_P_L},
+                free_latent=args.free_latent,
+                free_context=args.free_context,
+                free_LC=args.free_LC,
+                **kwargs,
+            )
+
+            generated_image = result.images[0]
+
+            orig_w, orig_h = original_size
+            if generated_image.size != (orig_w, orig_h):
+                generated_image = generated_image.resize((orig_w, orig_h), resample=Image.LANCZOS)
+
+            generated_image.save(save_path)
+            logger.info(f"Saved result to {save_path}")
+
+
+if __name__ == "__main__":
+    main()
