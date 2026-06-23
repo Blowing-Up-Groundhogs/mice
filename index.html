@@ -1,279 +1,211 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="MICE: Editing Everything Everywhere All at Once">
+  <meta name="description" content="MICE (Multi-Instance Concurrent Editing) is a training-free, architecture-agnostic strategy that modifies the additive bias of joint attention in MMDiTs to concurrently edit many regions of an image in a single pass, preventing attribute leakage while preserving global coherence.">
+  <meta name="keywords" content="multi-instance editing, concurrent editing, flow matching, MMDiT, FLUX.2, joint attention, image editing, MICE-Bench, machine learning, computer vision, ECCV 2026">
+  <meta name="author" content="Fabio Quattrini, Carmine Zaccagnino, Enis Simsar, Marta Tintoré Gazulla, Rita Cucchiara, Alessio Tonioni, Silvia Cascianelli">
+  <meta name="robots" content="index, follow">
+  <meta name="language" content="English">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="AImageLab — University of Modena and Reggio Emilia">
+  <meta property="og:title" content="MICE: Editing Everything Everywhere All at Once">
+  <meta property="og:description" content="Training-free multi-instance concurrent image editing with MMDiTs via smoothly-disentangled joint attention.">
+  <meta property="og:url" content="https://mice.silviacascianelli.com/">
+  <meta property="og:image" content="https://mice.silviacascianelli.com/static/images/teaser.png">
+  <meta property="og:image:alt" content="MICE multi-instance concurrent editing teaser">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="MICE: Editing Everything Everywhere All at Once">
+  <meta name="twitter:description" content="Training-free multi-instance concurrent image editing with MMDiTs via smoothly-disentangled joint attention.">
+  <meta name="twitter:image" content="https://mice.silviacascianelli.com/static/images/teaser.png">
+
+  <!-- Academic/Research Specific -->
+  <meta name="citation_title" content="Editing Everything Everywhere All at Once">
+  <meta name="citation_author" content="Quattrini, Fabio">
+  <meta name="citation_author" content="Zaccagnino, Carmine">
+  <meta name="citation_author" content="Simsar, Enis">
+  <meta name="citation_author" content="Tintoré Gazulla, Marta">
+  <meta name="citation_author" content="Cucchiara, Rita">
+  <meta name="citation_author" content="Tonioni, Alessio">
+  <meta name="citation_author" content="Cascianelli, Silvia">
+  <meta name="citation_publication_date" content="2026">
+  <meta name="citation_conference_title" content="European Conference on Computer Vision (ECCV)">
+  <meta name="citation_pdf_url" content="https://mice.silviacascianelli.com/static/pdfs/paper.pdf">
+
+  <meta name="theme-color" content="#2563eb">
+
   <title>MICE: Editing Everything Everywhere All at Once</title>
 
-  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
+  <link rel="apple-touch-icon" href="static/images/favicon.ico">
 
-  <style>
-    body {
-      font-family: 'Noto Sans', sans-serif;
-    }
+  <!-- CSS -->
+  <link rel="stylesheet" href="static/css/bulma.min.css">
+  <link rel="stylesheet" href="static/css/index.css">
+  <link rel="stylesheet" href="static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="static/css/fontawesome.all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-    .navbar {
-      background-color: #fff;
-      border-bottom: 1px solid #e5e5e5;
-    }
+  <!-- JS -->
+  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="static/js/fontawesome.all.min.js"></script>
+  <script defer src="static/js/bulma-carousel.min.js"></script>
+  <script defer src="static/js/bulma-slider.min.js"></script>
+  <script defer src="static/js/index.js"></script>
 
-    .hero-body {
-      padding: 3rem 1.5rem 2rem;
-    }
-
-    .publication-title {
-      font-family: 'Google Sans', sans-serif;
-      font-weight: 700;
-    }
-
-    .publication-authors {
-      font-family: 'Google Sans', sans-serif;
-    }
-
-    .author-block a {
-      color: #363636;
-    }
-
-    .author-block a:hover {
-      color: #3273dc;
-      text-decoration: underline;
-    }
-
-    .publication-links .button {
-      margin: 4px;
-    }
-
-    .link-block a {
-      color: inherit;
-    }
-
-    .teaser .hero-body {
-      padding: 1rem 3rem 2rem;
-    }
-
-    .teaser-fig img {
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
-    }
-
-    section.section {
-      padding: 3rem 1.5rem;
-    }
-
-    .section-heading {
-      font-family: 'Google Sans', sans-serif;
-      font-size: 2rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
-    }
-
-    .abstract-text {
-      font-size: 1.1rem;
-      line-height: 1.8;
-      color: #444;
-    }
-
-    .highlight-box {
-      background: #f8f9fa;
-      border-left: 4px solid #3273dc;
-      padding: 1.25rem 1.5rem;
-      border-radius: 0 8px 8px 0;
-      margin-bottom: 1rem;
-    }
-
-    .highlight-box p {
-      margin: 0;
-      font-size: 1rem;
-      line-height: 1.6;
-      color: #363636;
-    }
-
-    .results-table th {
-      background-color: #f5f5f5;
-    }
-
-    .results-table .best {
-      font-weight: 700;
-      color: #23d160;
-    }
-
-    .bibtex-container {
-      background: #f5f5f5;
-      border-radius: 8px;
-      padding: 1.5rem;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9rem;
-      overflow-x: auto;
-      position: relative;
-      white-space: pre;
-    }
-
-    .copy-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-    }
-
-    .mice-logo-text {
-      font-family: 'Castoro', serif;
-      font-size: 1.8rem;
-      letter-spacing: 4px;
-      color: #363636;
-    }
-
-    .affiliation-logos img {
-      height: 36px;
-      margin: 0 12px;
-      filter: grayscale(20%);
-    }
-
-    .equal-contrib {
-      font-size: 0.85rem;
-      color: #999;
-    }
-
-    .figure-caption {
-      font-size: 0.92rem;
-      color: #666;
-      margin-top: 0.75rem;
-      text-align: center;
-      line-height: 1.5;
-    }
-
-    .navbar-more-works a {
-      font-size: 0.85rem;
-      font-weight: 600;
-      letter-spacing: 0.05em;
-      color: #666;
-    }
-
-    .navbar-more-works a:hover {
-      color: #3273dc;
-    }
-
-    footer.footer {
-      background: #fafafa;
-      padding: 2rem 1.5rem;
-      border-top: 1px solid #e5e5e5;
-    }
-
-    .footer-text {
-      font-size: 0.85rem;
-      color: #aaa;
-    }
-
-    .footer-text a {
-      color: #888;
-      text-decoration: underline;
-    }
-
-    @media (max-width: 768px) {
-      .publication-title {
-        font-size: 1.8rem !important;
-      }
-    }
-  </style>
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "Editing Everything Everywhere All at Once",
+    "description": "MICE (Multi-Instance Concurrent Editing): a training-free, architecture-agnostic strategy modifying the additive bias of joint attention in MMDiTs to concurrently edit many image regions in a single pass.",
+    "author": [
+      {"@type": "Person", "name": "Fabio Quattrini", "affiliation": {"@type": "Organization", "name": "University of Modena and Reggio Emilia"}},
+      {"@type": "Person", "name": "Carmine Zaccagnino", "affiliation": {"@type": "Organization", "name": "University of Modena and Reggio Emilia"}},
+      {"@type": "Person", "name": "Enis Simsar", "affiliation": {"@type": "Organization", "name": "ETH Zurich"}},
+      {"@type": "Person", "name": "Marta Tintoré Gazulla", "affiliation": {"@type": "Organization", "name": "Google"}},
+      {"@type": "Person", "name": "Rita Cucchiara", "affiliation": {"@type": "Organization", "name": "University of Modena and Reggio Emilia"}},
+      {"@type": "Person", "name": "Alessio Tonioni", "affiliation": {"@type": "Organization", "name": "Google"}},
+      {"@type": "Person", "name": "Silvia Cascianelli", "affiliation": {"@type": "Organization", "name": "University of Modena and Reggio Emilia"}}
+    ],
+    "datePublished": "2026",
+    "publisher": {"@type": "Organization", "name": "European Conference on Computer Vision (ECCV)"},
+    "url": "https://mice.silviacascianelli.com/",
+    "image": "https://mice.silviacascianelli.com/static/images/teaser.png",
+    "isAccessibleForFree": true,
+    "license": "https://creativecommons.org/licenses/by-sa/4.0/"
+  }
+  </script>
 </head>
 <body>
 
-<nav class="navbar" role="navigation" aria-label="main navigation">
-  <div class="navbar-brand" style="padding-left:1rem;">
-    <span class="mice-logo-text" style="padding: 0.75rem 0;">MICE</span>
-  </div>
-  <div class="navbar-menu">
-    <div class="navbar-end navbar-more-works" style="padding-right:1.5rem; align-items:center; display:flex; gap: 1rem;">
-      <a href="https://idattn.silviacascianelli.com" target="_blank">IDAttn</a>
-      <a href="https://eruku.carminezacc.com" target="_blank">ERUKU</a>
-      <a href="https://scam.silviacascianelli.com" target="_blank">SCAM</a>
+  <!-- Scroll to Top Button -->
+  <button class="scroll-to-top" onclick="scrollToTop()" title="Scroll to top" aria-label="Scroll to top">
+    <i class="fas fa-chevron-up"></i>
+  </button>
+
+  <!-- More Works Dropdown -->
+  <div class="more-works-container">
+    <button class="more-works-btn" onclick="toggleMoreWorks()" title="View More Works from Our Lab">
+      <i class="fas fa-flask"></i>
+      More Works
+      <i class="fas fa-chevron-down dropdown-arrow"></i>
+    </button>
+    <div class="more-works-dropdown" id="moreWorksDropdown">
+      <div class="dropdown-header">
+        <h4>More Works from Our Lab</h4>
+        <button class="close-btn" onclick="toggleMoreWorks()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="works-list">
+        <a href="https://idattn.silviacascianelli.com/" class="work-item" target="_blank" rel="noopener">
+          <div class="work-info">
+            <h5>Shifting the Breaking Point of Flow Matching for Multi-Instance Editing</h5>
+            <p>Instance-Disentangled Attention (IDAttn) for single-pass, disentangled multi-instance editing.</p>
+            <span class="work-venue">ICML 2026</span>
+          </div>
+          <i class="fas fa-external-link-alt"></i>
+        </a>
+        <a href="https://eruku.carminezacc.com/" class="work-item" target="_blank" rel="noopener">
+          <div class="work-info">
+            <h5>Eruku: Autoregressive Styled Text Image Generation, but Make it Reliable</h5>
+            <p>Faithful and readable styled text image generation with an autoregressive model.</p>
+            <span class="work-venue">WACV 2026</span>
+          </div>
+          <i class="fas fa-external-link-alt"></i>
+        </a>
+        <a href="https://scam.silviacascianelli.com/" class="work-item" target="_blank" rel="noopener">
+          <div class="work-info">
+            <h5>SCAM: Styled Coptic Annotated Manuscripts</h5>
+            <p>A benchmark and study on styled text image generation for historical manuscripts.</p>
+            <span class="work-venue">Project Page</span>
+          </div>
+          <i class="fas fa-external-link-alt"></i>
+        </a>
+        <a href="https://github.com/Blowing-Up-Groundhogs" class="work-item" target="_blank" rel="noopener">
+          <div class="work-info">
+            <h5>Blowing Up Groundhogs</h5>
+            <p>More generative models, datasets, and tooling from the group.</p>
+            <span class="work-venue">GitHub</span>
+          </div>
+          <i class="fas fa-external-link-alt"></i>
+        </a>
+      </div>
     </div>
   </div>
-</nav>
 
-<!-- Hero / Title -->
-<section class="hero">
-  <div class="hero-body">
-    <div class="container is-max-desktop">
-      <div class="columns is-centered">
-        <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">
-            Editing Everything Everywhere All at Once
-          </h1>
-          <div class="is-size-4 publication-authors" style="margin-top: 0.5rem; margin-bottom: 1rem;">
-            <span style="font-weight: 500; color: #555; letter-spacing: 1px;">MICE: Multi-Instance Concurrent Editing</span>
-          </div>
+  <main id="main-content">
+  <section class="hero">
+    <div class="hero-body">
+      <div class="container is-max-desktop">
+        <div class="columns is-centered">
+          <div class="column has-text-centered">
+            <p class="is-size-3 has-text-weight-bold" style="letter-spacing:0.35em;color:var(--primary-color);margin-bottom:0.5rem;">MICE</p>
+            <h1 class="title is-1 publication-title">Editing Everything Everywhere All at Once</h1>
+            <p class="is-size-5" style="color:var(--text-secondary);margin-top:-1rem;margin-bottom:1.5rem;font-weight:500;">Multi-Instance Concurrent Editing</p>
 
-          <div class="is-size-5 publication-authors" style="margin-bottom: 1rem;">
-            <span class="author-block">
-              <a href="https://scholar.google.com/search?q=Fabio+Quattrini" target="_blank">Fabio Quattrini</a><sup>*1</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://carminezacc.com" target="_blank">Carmine Zaccagnino</a><sup>*1</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://enis.dev" target="_blank">Enis Simsar</a><sup>2</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://scholar.google.com/search?q=Marta+Tintoré+Gazulla" target="_blank">Marta Tintoré Gazulla</a><sup>3</sup>,
-            </span>
-            <br>
-            <span class="author-block">
-              <a href="https://scholar.google.com/citations?user=OM3sZEoAAAAJ" target="_blank">Rita Cucchiara</a><sup>1</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://scholar.google.com/citations?user=2EqXMGIAAAAJ" target="_blank">Alessio Tonioni</a><sup>3</sup>,
-            </span>
-            <span class="author-block">
-              <a href="https://silviacascianelli.com" target="_blank">Silvia Cascianelli</a><sup>1</sup>
-            </span>
-          </div>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">Fabio Quattrini<sup>*,1</sup>,</span>
+              <span class="author-block">Carmine Zaccagnino<sup>*,1</sup>,</span>
+              <span class="author-block">Enis Simsar<sup>2</sup>,</span>
+              <span class="author-block">Marta Tintoré Gazulla<sup>3</sup>,</span>
+              <span class="author-block">Rita Cucchiara<sup>1</sup>,</span>
+              <span class="author-block">Alessio Tonioni<sup>3</sup>,</span>
+              <span class="author-block">Silvia Cascianelli<sup>1</sup></span>
+            </div>
 
-          <div class="is-size-6 equal-contrib" style="margin-bottom: 1rem;">
-            <sup>*</sup>Equal contribution, order determined by a coin flip
-          </div>
+            <div class="is-size-5 publication-authors">
+              <span class="author-block"><sup>1</sup>University of Modena and Reggio Emilia&nbsp;&nbsp;</span>
+              <span class="author-block"><sup>2</sup>ETH Zurich&nbsp;&nbsp;</span>
+              <span class="author-block"><sup>3</sup>Google</span>
+              <br>
+              <span class="author-block"><strong>ECCV 2026</strong></span>
+              <span class="eql-cntrb"><small><br><sup>*</sup>Equal contribution, order determined by a coin flip.</small></span>
+            </div>
 
-          <div class="is-size-5 publication-authors" style="margin-bottom: 2rem;">
-            <span class="author-block"><sup>1</sup>University of Modena and Reggio Emilia&ensp;</span>
-            <span class="author-block"><sup>2</sup>ETH Zurich&ensp;</span>
-            <span class="author-block"><sup>3</sup>Google</span>
-          </div>
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                <!-- PDF -->
+                <span class="link-block">
+                  <a href="static/pdfs/paper.pdf" target="_blank"
+                  class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                  <span>Paper</span>
+                </a>
+              </span>
 
-          <div class="is-size-5 has-text-weight-semibold" style="margin-bottom: 2rem; color: #555;">
-            ECCV 2026
-          </div>
-
-          <div class="publication-links">
-            <span class="link-block">
-              <a href="https://arxiv.org/abs/2602.08749" target="_blank"
-                 class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="fas fa-file-pdf"></i></span>
-                <span>Paper</span>
-              </a>
-            </span>
-            <span class="link-block">
-              <a href="https://arxiv.org/abs/2602.08749" target="_blank"
-                 class="external-link button is-normal is-rounded is-dark">
-                <span class="icon"><i class="ai ai-arxiv"></i></span>
-                <span>arXiv</span>
-              </a>
-            </span>
-            <span class="link-block">
-              <a href="https://github.com/Blowing-Up-Groundhogs/mice" target="_blank"
-                 class="external-link button is-normal is-rounded is-dark">
+              <!-- Code -->
+              <span class="link-block">
+                <a href="https://github.com/Blowing-Up-Groundhogs/mice" target="_blank" rel="noopener"
+                class="external-link button is-normal is-rounded is-dark">
                 <span class="icon"><i class="fab fa-github"></i></span>
                 <span>Code</span>
               </a>
             </span>
-            <span class="link-block">
-              <a href="https://huggingface.co/datasets/blowing-up-groundhogs/mice_bench" target="_blank"
-                 class="external-link button is-normal is-rounded is-info">
-                <span class="icon"><i class="fas fa-database"></i></span>
-                <span>MICE-Bench</span>
-              </a>
-            </span>
-          </div>
 
+            <!-- Dataset -->
+            <span class="link-block">
+              <a href="https://huggingface.co/datasets/blowing-up-groundhogs/mice_bench" target="_blank" rel="noopener"
+              class="external-link button is-normal is-rounded is-dark">
+              <span class="icon">🤗</span>
+              <span>MICE-Bench</span>
+            </a>
+          </span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -283,335 +215,277 @@
 <!-- Teaser -->
 <section class="hero teaser">
   <div class="container is-max-desktop">
-    <div class="hero-body has-text-centered">
-      <div class="teaser-fig">
-        <img src="static/images/teaser.png" alt="MICE teaser: multi-instance concurrent editing example showing original image, segmentation masks, edit instructions, and edited result.">
-      </div>
-      <p class="figure-caption">
-        <strong>MICE</strong> modifies the joint attention maps of MMDiT-based flow matching generative models to concurrently
-        edit multiple elements at inference time, guided by segmentation masks and per-instance text instructions.
-      </p>
+    <div class="hero-body">
+      <img src="static/images/teaser.png" alt="MICE concurrently edits multiple regions of an image in a single pass, guided by per-instance masks and instructions." style="width:100%;border-radius:8px;"/>
+      <h2 class="subtitle has-text-centered" style="margin-top:1rem;">
+        <strong>MICE</strong> modifies the joint attention maps of MMDiT-based flow matching models to
+        <strong>concurrently edit multiple elements</strong> of an image at inference time, guided by per-instance
+        segmentation masks and editing instructions &mdash; all in a <strong>single pass</strong>.
+      </h2>
     </div>
   </div>
 </section>
 
-<hr style="margin: 0 3rem;">
-
 <!-- Abstract -->
-<section class="section">
+<section class="section hero is-light">
   <div class="container is-max-desktop">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
-        <h2 class="title is-3 section-heading">Abstract</h2>
+        <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
-          <p class="abstract-text">
-            Editing multiple elements of an image in a single forward pass is a practical alternative to multi-turn image
-            manipulation, offering improved efficiency and potentially better harmonization. However, when several instructions
-            target different regions, semantic interference often leads to <em>attribute leakage</em> and poor edit
-            disentanglement, especially as the number of edits increases.
+          <p>
+            Editing multiple elements of an image in a single forward pass is a practical alternative to multi-turn
+            image manipulation, offering improved efficiency and potentially better harmonization. However, when
+            several instructions target different regions, semantic interference often leads to <strong>attribute
+            leakage</strong> and poor edit disentanglement, especially as the number of edits increases.
           </p>
-          <p class="abstract-text">
-            In this work, we propose <strong>MICE</strong> (Multi-Instance Concurrent Editing), a training-free strategy for
-            scalable multi-instance image editing with Multimodal Diffusion Transformers. MICE modifies the additive bias of
-            joint attention to regulate interactions between instance-specific edit instructions, latent, and context tokens
-            identified via user-provided segmentation masks. Specifically, MICE allows intra-instance attention, penalizes
-            interactions between neighboring region tokens, and suppresses unrelated cross-instance attention. As a result,
-            our method enforces attribute binding while preserving global visual consistency.
+          <p>
+            In this work, we propose <strong>MICE</strong> (Multi-Instance Concurrent Editing), a training-free
+            strategy for scalable multi-instance image editing with Multimodal Diffusion Transformers. MICE modifies
+            the additive bias of joint attention to regulate interactions between instance-specific edit instructions,
+            latent, and context tokens identified via user-provided segmentation masks. Specifically, MICE allows
+            intra-instance attention, penalizes interactions between neighboring region tokens, and suppresses
+            unrelated cross-instance attention. As a result, our method enforces attribute binding while preserving
+            global visual consistency.
           </p>
-          <p class="abstract-text">
-            We evaluate MICE on LoMOE-Bench and introduce <strong>MICE-Bench</strong>, a more challenging benchmark with an
-            average of 8.5 concurrent edits per image. The experiments demonstrate that our approach outperforms strong
-            baselines and recent competitors in terms of visual quality preservation and faithfulness to the editing
-            instructions.
+          <p>
+            We evaluate MICE on LoMOE-Bench and introduce <strong>MICE-Bench</strong>, a more challenging benchmark
+            with an average of 8.5 concurrent edits per image. The experiments demonstrate that our approach
+            outperforms strong baselines and recent competitors in terms of visual quality preservation and
+            faithfulness to the editing instructions.
           </p>
         </div>
       </div>
     </div>
   </div>
 </section>
-
-<hr style="margin: 0 3rem;">
 
 <!-- Highlights -->
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-heading has-text-centered">Highlights</h2>
-    <div class="columns is-multiline">
+    <h2 class="title is-3 has-text-centered">Highlights</h2>
+    <div class="columns is-multiline is-centered" style="margin-top:1rem;">
       <div class="column is-half">
-        <div class="highlight-box">
-          <p>
-            <strong>🎯 Training-free &amp; architecture-agnostic.</strong>
-            MICE requires no fine-tuning and works across multiple MMDiT-based backbones
-            (FLUX.2 klein 4B/9B, FLUX.2-Dev, FLUX.1 Kontext) without per-layer hyperparameter tuning.
-          </p>
+        <div class="box" style="height:100%;">
+          <h3 class="title is-5"><span class="icon-text"><span class="icon has-text-info"><i class="fas fa-magic"></i></span>&nbsp;<span>Training-Free &amp; Architecture-Agnostic</span></span></h3>
+          <p>No fine-tuning and no per-layer hyperparameter tuning. A single bias matrix is applied uniformly across
+          all attention layers, making MICE portable across MMDiT backbones (FLUX.2 klein 4B/9B, FLUX.2-Dev, FLUX.1 Kontext).</p>
         </div>
       </div>
       <div class="column is-half">
-        <div class="highlight-box">
-          <p>
-            <strong>🔒 Instance-disentangled attention.</strong>
-            A single parametric additive bias matrix replaces hard binary masking strategies,
-            achieving smooth blending while preventing attribute leakage between editing instances.
-          </p>
+        <div class="box" style="height:100%;">
+          <h3 class="title is-5"><span class="icon-text"><span class="icon has-text-info"><i class="fas fa-object-group"></i></span>&nbsp;<span>Smoothly-Disentangled Attention</span></span></h3>
+          <p>A parametric, spatially-smoothed additive bias replaces hard binary masks &mdash; enabling a continuous
+          transition between instance isolation and global harmonization, without harsh seams or attribute leakage.</p>
         </div>
       </div>
       <div class="column is-half">
-        <div class="highlight-box">
-          <p>
-            <strong>📊 New challenging benchmark: MICE-Bench.</strong>
-            260 samples from COCO and LVIS with 5–40 concurrent edits per image (avg. 8.5),
-            far exceeding the density of existing benchmarks such as LoMOE-Bench.
-          </p>
+        <div class="box" style="height:100%;">
+          <h3 class="title is-5"><span class="icon-text"><span class="icon has-text-info"><i class="fas fa-database"></i></span>&nbsp;<span>MICE-Bench</span></span></h3>
+          <p>A new, harder benchmark: 260 samples from COCO and LVIS with 5&ndash;40 concurrent edits per image
+          (averaging 8.5), far exceeding the editing density of prior benchmarks such as LoMOE-Bench.</p>
         </div>
       </div>
       <div class="column is-half">
-        <div class="highlight-box">
-          <p>
-            <strong>⚡ Efficient scaling.</strong>
-            Unlike multi-branch methods whose memory and compute grow linearly with the number of
-            edits, MICE scales like a single-pass inference, enabling dozens of concurrent edits on a single GPU.
-          </p>
+        <div class="box" style="height:100%;">
+          <h3 class="title is-5"><span class="icon-text"><span class="icon has-text-info"><i class="fas fa-bolt"></i></span>&nbsp;<span>Single-Pass &amp; Efficient</span></span></h3>
+          <p>All edits are applied at once. Unlike multi-branch methods whose memory and runtime grow linearly with
+          the number of edits, MICE scales like single-pass inference &mdash; enabling dozens of concurrent edits on one GPU.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
-
-<hr style="margin: 0 3rem;">
 
 <!-- Method -->
-<section class="section">
+<section class="section hero is-light">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-heading has-text-centered">Method</h2>
-    <div class="content">
-      <p style="font-size: 1.05rem; line-height: 1.8; color: #444;">
-        MICE operates on the joint attention mechanism of Multimodal Diffusion Transformers (MMDiTs).
-        Given an input image, a set of per-instance segmentation masks, and a corresponding set of text
-        editing instructions, MICE partitions all token sequences — prompt tokens, latent tokens, and context
-        tokens — into instance-specific groups.
-      </p>
-      <p style="font-size: 1.05rem; line-height: 1.8; color: #444;">
-        The core contribution is a <strong>smoothly-disentangled additive bias matrix</strong> applied uniformly
-        across all attention layers. Each segmentation mask is smoothed by a parametric Gaussian kernel with an
-        instance-aware strategy that prevents smoothing from spilling into neighboring instances. The resulting
-        continuous values are mapped to log-probability space and used as a spatial attention penalty: tokens
-        belonging to an instance attend freely within that instance, interact with decreasing strength at nearby
-        regions (enabling smooth blending), and are prevented from attending to unrelated instances.
-      </p>
-      <p style="font-size: 1.05rem; line-height: 1.8; color: #444;">
-        This unified formulation eliminates the need to choose architecture-specific layers for hard-vs-soft
-        attention regimes, making MICE portable across different MMDiT backbones.
-      </p>
-    </div>
-
-    <div class="has-text-centered" style="margin-top: 2rem;">
-      <figure>
-        <img src="static/images/method.png" alt="MICE method diagram showing the bias map construction from segmentation masks and its application to the joint attention in MMDiT." style="max-width:100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.10);">
-        <figcaption class="figure-caption">
-          The MICE bias map (right) regulates interactions between background and instance-specific prompt, latent, and context tokens, using instance-aware smoothed segmentation masks as spatial guidance.
-        </figcaption>
-      </figure>
+    <div class="columns is-centered">
+      <div class="column is-full">
+        <h2 class="title is-3 has-text-centered">Method</h2>
+        <div class="content has-text-justified">
+          <p>
+            State-of-the-art flow-matching editors parameterize the velocity field with a Multimodal Diffusion
+            Transformer (MMDiT) and apply <em>joint attention</em> over concatenated prompt, latent, and context
+            tokens. Allowing every token to attend to every other token causes <em>attribute leakage</em>: concepts
+            meant for one region bleed into others as the number of edits grows.
+          </p>
+          <p>
+            <strong>MICE</strong> operates directly on the additive bias <em>B</em> of the joint attention map. Each
+            user-provided segmentation mask is smoothed with a parametric Gaussian kernel using an
+            <strong>instance-aware</strong> strategy: smoothing is zeroed wherever it would spill into a neighboring
+            instance. The smoothed masks are mapped into log-probability space and used as a spatial penalty, so that
+            tokens of an instance attend freely within it, interact with <em>decreasing</em> strength to nearby
+            regions (enabling smooth blending), and are blocked from attending to unrelated instances.
+          </p>
+        </div>
+        <figure class="image" style="max-width:760px;margin:1.5rem auto 0;">
+          <img src="static/images/smoothing.png" alt="Instance-aware smoothing: each segmentation mask is smoothed independently and zeroed where it touches a neighboring mask." style="border-radius:8px;"/>
+        </figure>
+        <p class="has-text-centered is-size-6" style="margin-top:0.75rem;">
+          <strong>Instance-aware smoothing.</strong> Each mask is smoothed independently; smoothed values are zeroed
+          when touching a neighboring mask (red/yellow). Distant instances (blue) are smoothed without constraints.
+        </p>
+        <figure class="image" style="max-width:820px;margin:2.5rem auto 0;">
+          <img src="static/images/method.png" alt="MICE bias matrix construction regulating prompt, latent, and context token interactions per instance." style="border-radius:8px;"/>
+        </figure>
+        <p class="has-text-centered is-size-6" style="margin-top:0.75rem;">
+          <strong>Biased joint attention.</strong> MICE defines a bias map (right) that regulates the interaction
+          between background and instance-specific prompt, latent, and context tokens, using the smoothed masks.
+        </p>
+      </div>
     </div>
   </div>
 </section>
-
-<hr style="margin: 0 3rem;">
 
 <!-- MICE-Bench -->
 <section class="section">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-heading has-text-centered">MICE-Bench</h2>
-    <div class="content">
-      <p style="font-size: 1.05rem; line-height: 1.8; color: #444;">
-        Existing benchmarks for multi-instance editing are limited in editing density: prior work averages
-        only 3 concurrent edits per image. To enable rigorous evaluation in high-density settings, we
-        introduce <strong>MICE-Bench</strong>:
-      </p>
-      <ul style="font-size: 1.05rem; line-height: 2; color: #444; margin-left: 1.5rem;">
-        <li><strong>260 samples</strong> sourced from the COCO and LVIS validation sets</li>
-        <li><strong>5–40 concurrent edits</strong> per image, averaging <strong>8.5 edits</strong></li>
-        <li>Annotations generated by a multimodal LLM (Gemini 3 Flash) and manually verified</li>
-        <li>Multiple annotation formats: per-instance instructions, referring expressions, and a global prompt</li>
-        <li>Compatible with both ground-truth segmentation masks and masks from an automatic segmenter (SAM3)</li>
-      </ul>
-    </div>
-    <div class="has-text-centered" style="margin-top: 1.5rem;">
-      <a href="https://huggingface.co/datasets/blowing-up-groundhogs/mice_bench" target="_blank"
-         class="button is-info is-medium is-rounded">
-        <span class="icon"><i class="fas fa-database"></i></span>
-        <span>Get MICE-Bench</span>
-      </a>
+    <div class="columns is-centered">
+      <div class="column is-full">
+        <h2 class="title is-3 has-text-centered">MICE-Bench</h2>
+        <div class="content has-text-justified">
+          <p>
+            Existing benchmarks for multi-instance concurrent editing on natural images lack settings with a high
+            number of concurrent edits &mdash; prior work averages only around three edits per image, providing little
+            room to verify a model's ability to perform an arbitrarily high number of concurrent edits. To bridge this
+            gap, we introduce <strong>MICE-Bench</strong>, specifically annotated for high-density editing:
+          </p>
+          <ul>
+            <li><strong>260 samples</strong> selected from the COCO and LVIS validation sets, chosen for diverse object counts.</li>
+            <li><strong>5&ndash;40 concurrent edits</strong> per image, with an average of <strong>8.5</strong>.</li>
+            <li>Creative-yet-realistic target replacements proposed by a multimodal LLM (Gemini 3 Flash) and <strong>manually verified</strong>.</li>
+            <li>Multiple annotation formats: per-instance instructions, referring expressions, and a single global prompt.</li>
+            <li>Usable with both ground-truth masks and masks from a promptable segmenter (SAM3).</li>
+          </ul>
+          <p class="has-text-centered" style="margin-top:1.5rem;">
+            <a href="https://huggingface.co/datasets/blowing-up-groundhogs/mice_bench" target="_blank" rel="noopener"
+            class="button is-rounded is-dark">
+              <span class="icon">🤗</span><span>Get MICE-Bench on Hugging Face</span>
+            </a>
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </section>
-
-<hr style="margin: 0 3rem;">
 
 <!-- Results -->
-<section class="section">
+<section class="section hero is-light">
   <div class="container is-max-desktop">
-    <h2 class="title is-3 section-heading has-text-centered">Results</h2>
+    <div class="columns is-centered">
+      <div class="column is-full">
+        <h2 class="title is-3 has-text-centered">Results</h2>
 
-    <h3 class="title is-4" style="margin-bottom: 1rem;">Comparison with the State of the Art</h3>
-    <div class="content">
-      <p style="font-size: 1.0rem; color: #555; margin-bottom: 1rem;">
-        MICE-9B (MICE applied to FLUX.2 klein 9B) outperforms all baselines in Localized CLIP score on both
-        LoMOE-Bench and MICE-Bench, including the closed-source Gemini 3 Pro Image. LLM-as-judge ELO scores
-        confirm MICE as the top-performing model in both settings.
-      </p>
+        <h3 class="title is-4 has-text-centered" style="margin-bottom:1rem;">Comparison with the State of the Art</h3>
+        <p class="has-text-centered content" style="margin-bottom:1.5rem;">
+          MICE-9B (MICE on FLUX.2 klein 9B) achieves the best <strong>Localized CLIP score</strong> on both
+          benchmarks &mdash; surpassing even the closed-source Gemini 3 Pro Image &mdash; and remains strong when fed
+          automatic SAM3 masks instead of ground-truth ones.
+        </p>
+        <div class="table-container">
+          <table class="table is-bordered is-striped is-hoverable is-fullwidth" style="background:#fff;">
+            <thead>
+              <tr>
+                <th rowspan="2" style="vertical-align:middle;">Model</th>
+                <th colspan="4" class="has-text-centered">LoMOE-Bench</th>
+                <th colspan="4" class="has-text-centered">MICE-Bench</th>
+              </tr>
+              <tr>
+                <th>Tgt C&uarr;</th><th>Loc C&uarr;</th><th>MAE<sub>B</sub>&darr;</th><th>AR%&uarr;</th>
+                <th>Tgt C&uarr;</th><th>Loc C&uarr;</th><th>MAE<sub>B</sub>&darr;</th><th>AR%&uarr;</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>FLUX.2 [klein] 9B</td><td>26.57</td><td>29.45</td><td>8.63</td><td>99.48</td><td>25.66</td><td>26.34</td><td>27.12</td><td>100.0</td></tr>
+              <tr><td>Gemini 3 Pro Image</td><td>26.82</td><td>29.67</td><td>7.24</td><td>97.37</td><td>25.64</td><td>27.09</td><td>13.08</td><td>98.97</td></tr>
+              <tr><td>Qwen-Image-Edit</td><td>26.34</td><td>28.85</td><td>7.13</td><td>88.02</td><td>25.26</td><td>25.33</td><td>26.47</td><td>98.83</td></tr>
+              <tr><td>IDAttn</td><td>25.67</td><td>29.26</td><td>6.41</td><td>98.44</td><td>24.68</td><td>25.54</td><td>5.06</td><td>73.01</td></tr>
+              <tr><td>LoMOE</td><td>26.00</td><td>29.40</td><td>6.66</td><td>92.19</td><td>24.99</td><td>25.46</td><td>7.76</td><td>99.07</td></tr>
+              <tr><td>LayerEdit</td><td>25.61</td><td>29.07</td><td>7.43</td><td>97.92</td><td>23.77</td><td>24.38</td><td>9.32</td><td>99.51</td></tr>
+              <tr style="background:#eff6ff;"><td><strong>MICE</strong> (ours)</td><td>26.49</td><td><strong>30.30</strong></td><td>8.88</td><td>98.44</td><td>25.24</td><td><strong>27.79</strong></td><td>13.89</td><td>98.97</td></tr>
+              <tr style="background:#eff6ff;"><td><strong>MICE + SAM3</strong> (ours)</td><td>26.22</td><td><strong>30.41</strong></td><td>8.94</td><td>96.88</td><td>25.26</td><td><strong>27.73</strong></td><td>13.36</td><td>98.54</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="is-size-7 has-text-centered" style="color:var(--text-light);">
+          Tgt C: Target CLIP Score &middot; Loc C: Localized CLIP Score &middot; MAE<sub>B</sub>: background MAE &middot; AR%: Attempt Rate.
+        </p>
 
-      <div class="table-container">
-        <table class="table is-bordered is-striped is-hoverable results-table" style="font-size: 0.9rem;">
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th colspan="4" class="has-text-centered">LoMOE-Bench</th>
-              <th colspan="4" class="has-text-centered">MICE-Bench</th>
-            </tr>
-            <tr>
-              <th></th>
-              <th>Tgt C ↑</th><th>Loc C ↑</th><th>MAE<sub>B</sub> ↓</th><th>AR% ↑</th>
-              <th>Tgt C ↑</th><th>Loc C ↑</th><th>MAE<sub>B</sub> ↓</th><th>AR% ↑</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>FLUX.2 [klein] 9B (baseline)</td>
-              <td>26.57</td><td>29.45</td><td>8.63</td><td>99.48</td>
-              <td>25.66</td><td>26.34</td><td>27.12</td><td>100.0</td>
-            </tr>
-            <tr>
-              <td>Gemini 3 Pro Image</td>
-              <td>26.82</td><td>29.67</td><td>7.24</td><td>97.37</td>
-              <td>25.64</td><td>27.09</td><td>13.08</td><td>98.97</td>
-            </tr>
-            <tr>
-              <td>Qwen-Image-Edit</td>
-              <td>26.34</td><td>28.85</td><td>7.13</td><td>88.02</td>
-              <td>25.26</td><td>25.33</td><td>26.47</td><td>98.83</td>
-            </tr>
-            <tr>
-              <td>IDAttn</td>
-              <td>25.67</td><td>29.26</td><td>6.41</td><td>98.44</td>
-              <td>24.68</td><td>25.54</td><td>5.06</td><td>73.01</td>
-            </tr>
-            <tr>
-              <td>LoMOE</td>
-              <td>26.00</td><td>29.40</td><td>6.66</td><td>92.19</td>
-              <td>24.99</td><td>25.46</td><td>7.76</td><td>99.07</td>
-            </tr>
-            <tr>
-              <td>LayerEdit</td>
-              <td>25.61</td><td>29.07</td><td>7.43</td><td>97.92</td>
-              <td>23.77</td><td>24.38</td><td>9.32</td><td>99.51</td>
-            </tr>
-            <tr style="background: #fffbe6;">
-              <td><strong>MICE</strong> (ours)</td>
-              <td>26.49</td><td class="best">30.30</td><td>8.88</td><td>98.44</td>
-              <td>25.24</td><td class="best">27.79</td><td>13.89</td><td>98.97</td>
-            </tr>
-            <tr style="background: #fffbe6;">
-              <td><strong>MICE + SAM3</strong> (ours)</td>
-              <td>26.22</td><td class="best">30.41</td><td>8.94</td><td>96.88</td>
-              <td>25.26</td><td class="best">27.73</td><td>13.36</td><td>98.54</td>
-            </tr>
-          </tbody>
-        </table>
+        <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem;margin-bottom:1rem;">LLM-as-Judge Evaluation (ELO)</h3>
+        <p class="has-text-centered content" style="margin-bottom:1.5rem;">
+          From 900 binary comparisons judged by Gemini 3.1 Pro (prompt following, background preservation, overall
+          quality), MICE ranks <strong>first</strong> on both benchmarks.
+        </p>
+        <div class="columns is-centered">
+          <div class="column is-half">
+            <div class="table-container">
+              <table class="table is-bordered is-striped is-hoverable is-fullwidth" style="background:#fff;">
+                <thead>
+                  <tr><th>Model</th><th>LoMOE-Bench&uarr;</th><th>MICE-Bench&uarr;</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>FLUX.2 [klein] 9B</td><td>1299.78</td><td>1172.16</td></tr>
+                  <tr><td>IDAttn</td><td>1223.57</td><td>1412.73</td></tr>
+                  <tr><td>LayerEdit</td><td>887.98</td><td>858.92</td></tr>
+                  <tr><td>LoMOE</td><td>1181.02</td><td>995.05</td></tr>
+                  <tr><td>Qwen-Image-Edit</td><td>1265.12</td><td>1192.69</td></tr>
+                  <tr style="background:#eff6ff;"><td><strong>MICE</strong> (ours)</td><td><strong>1342.53</strong></td><td><strong>1568.46</strong></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem;margin-bottom:1rem;">Qualitative Results</h3>
+        <figure class="image" style="margin:0 auto;">
+          <img src="static/images/qualitative.png" alt="Qualitative comparison of MICE against LoMOE, FLUX.2 and IDAttn on LoMOE-Bench and MICE-Bench." style="border-radius:8px;"/>
+        </figure>
+        <p class="has-text-centered is-size-6" style="margin-top:0.75rem;">
+          Qualitative comparison on LoMOE-Bench (top) and MICE-Bench (bottom). MICE excels at background and layout
+          preservation as well as prompt following, while baselines miss edits or distort the composition.
+        </p>
       </div>
-
-      <h3 class="title is-4" style="margin-top: 2.5rem; margin-bottom: 1rem;">LLM-as-Judge Evaluation (ELO)</h3>
-      <p style="font-size: 1.0rem; color: #555; margin-bottom: 1rem;">
-        We ran 900 binary comparisons using Gemini 3.1 Pro as a judge evaluating prompt following, background
-        preservation, and overall visual quality. MICE ranks first on both benchmarks.
-      </p>
-      <div class="table-container">
-        <table class="table is-bordered is-striped is-hoverable results-table" style="font-size: 0.9rem; max-width: 520px;">
-          <thead>
-            <tr>
-              <th>Model</th>
-              <th>LoMOE-Bench ELO ↑</th>
-              <th>MICE-Bench ELO ↑</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td>FLUX.2 [klein] 9B</td><td>1299.78</td><td>1172.16</td></tr>
-            <tr><td>IDAttn</td><td>1223.57</td><td>1412.73</td></tr>
-            <tr><td>LayerEdit</td><td>887.98</td><td>858.92</td></tr>
-            <tr><td>LoMOE</td><td>1181.02</td><td>995.05</td></tr>
-            <tr><td>Qwen-Image-Edit</td><td>1265.12</td><td>1192.69</td></tr>
-            <tr style="background: #fffbe6;">
-              <td><strong>MICE</strong> (ours)</td>
-              <td class="best">1342.53</td>
-              <td class="best">1568.46</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <h3 class="title is-4" style="margin-top: 2.5rem; margin-bottom: 1rem;">Qualitative Results</h3>
-    <div class="has-text-centered">
-      <figure>
-        <img src="static/images/qualitative.png" alt="Qualitative comparison of MICE against LoMOE, FLUX.2, and IDAttn on LoMOE-Bench and MICE-Bench samples." style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.10);">
-        <figcaption class="figure-caption">
-          Qualitative comparison on LoMOE-Bench (top row) and MICE-Bench (bottom row). MICE achieves
-          superior background preservation and instruction following compared to LoMOE, FLUX.2 baseline, and IDAttn.
-        </figcaption>
-      </figure>
     </div>
   </div>
 </section>
 
-<hr style="margin: 0 3rem;">
-
-<!-- BibTeX -->
-<section class="section" id="bibtex">
+<!-- BibTeX citation -->
+<section class="section" id="BibTeX">
   <div class="container is-max-desktop content">
-    <h2 class="title is-3 section-heading">BibTeX</h2>
-    <p>If you use MICE or MICE-Bench in your research, please cite:</p>
-    <div style="position: relative;">
-      <div class="bibtex-container" id="bibtex-text">@inproceedings{mice2026,
-  title     = {Editing Everything Everywhere All at Once},
-  author    = {Quattrini, Fabio and Zaccagnino, Carmine and Simsar, Enis and
-               Tintor\'{e} Gazulla, Marta and Cucchiara, Rita and
-               Tonioni, Alessio and Cascianelli, Silvia},
-  booktitle = {Proceedings of the European Conference on Computer Vision (ECCV)},
-  year      = {2026}
-}</div>
-      <button class="button is-small is-light copy-btn" onclick="copyBibtex()" id="copy-btn">
-        <span class="icon"><i class="fas fa-copy"></i></span>
-        <span>Copy</span>
+    <div class="bibtex-header">
+      <h2 class="title">BibTeX</h2>
+      <button class="copy-bibtex-btn" onclick="copyBibTeX()" title="Copy BibTeX to clipboard">
+        <i class="fas fa-copy"></i>
+        <span class="copy-text">Copy</span>
       </button>
     </div>
+    <pre id="bibtex-code"><code>@inproceedings{quattrini2026mice,
+  title     = {{Editing Everything Everywhere All at Once}},
+  author    = {Quattrini, Fabio and Zaccagnino, Carmine and Simsar, Enis and
+               Tintor\'e Gazulla, Marta and Cucchiara, Rita and Tonioni, Alessio and
+               Cascianelli, Silvia},
+  booktitle = {Proceedings of the European Conference on Computer Vision (ECCV)},
+  year      = {2026}
+}</code></pre>
   </div>
 </section>
 
-<footer class="footer">
+  <footer class="footer">
   <div class="container">
-    <div class="content has-text-centered">
-      <p class="footer-text">
-        This page was built using the
-        <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a>,
-        which was adopted from the
-        <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
-        Licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>.
-      </p>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This page was built using the <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank" rel="noopener">Academic Project Page Template</a> which was adopted from the <a href="https://nerfies.github.io" target="_blank" rel="noopener">Nerfies</a> project page.
+            You are free to borrow the source code of this website, we just ask that you link back to this page in the footer. <br> This website is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+        </div>
+      </div>
     </div>
   </div>
 </footer>
 
-<script>
-  function copyBibtex() {
-    const text = document.getElementById('bibtex-text').innerText;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = document.getElementById('copy-btn');
-      btn.innerHTML = '<span class="icon"><i class="fas fa-check"></i></span><span>Copied!</span>';
-      setTimeout(() => {
-        btn.innerHTML = '<span class="icon"><i class="fas fa-copy"></i></span><span>Copy</span>';
-      }, 2000);
-    });
-  }
-</script>
-
-</body>
+  </main>
+  </body>
 </html>
