@@ -370,8 +370,69 @@
   </div>
 </section>
 
-<!-- Results -->
+<!-- Analysis -->
 <section class="section hero is-light">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered">
+      <div class="column is-full">
+        <h2 class="title is-3 has-text-centered">Analysis</h2>
+
+        <h3 class="title is-4 has-text-centered" style="margin-bottom:1rem;">Editing-Area Definition</h3>
+        <div class="content has-text-justified">
+          <p>
+            How instances are localized matters. <strong>Bounding boxes</strong> leak edits across overlapping
+            regions; <strong>hard segmentation masks</strong> isolate edits but introduce visible seams; and
+            <strong>naïvely Gaussian-smoothed</strong> masks blend neighboring instances together. Our
+            <strong>instance-aware smoothing</strong> follows every editing prompt while preserving each instance's
+            original shape when possible and harmonizing it with the rest of the image.
+          </p>
+        </div>
+        <figure class="image" style="max-width:860px;margin:0 auto;">
+          <img src="static/images/localization.jpg" alt="MICE with different instance-localization strategies: bounding boxes, original, Gaussian, and our instance-aware segmentation masks." style="border-radius:8px;"/>
+        </figure>
+        <p class="has-text-centered is-size-6" style="margin-top:0.75rem;">
+          Qualitative results when localizing instances with bounding boxes, original, Gaussian, and our
+          instance-aware segmentation masks.
+        </p>
+
+        <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem;margin-bottom:1rem;">Effect of <em>k</em> and <em>&tau;</em></h3>
+        <div class="content has-text-justified">
+          <p>
+            Two interpretable hyperparameters govern the spatial attention falloff: the kernel size <em>k</em>
+            controls how wide a neighborhood an instance can blend into, and the temperature <em>&tau;</em> controls
+            the strength of that blending. Larger values harmonize an edit more with its surroundings (helpful when an
+            edit changes an object's shape), while smaller values keep edits tightly localized.
+          </p>
+        </div>
+        <figure class="image" style="max-width:560px;margin:0 auto;">
+          <img src="static/images/ktau_sweep.jpg" alt="Qualitative effect of sweeping kernel size k (columns) and temperature tau (rows) for MICE on FLUX.2 klein 4B." style="border-radius:8px;"/>
+        </figure>
+        <p class="has-text-centered is-size-6" style="margin-top:0.75rem;">
+          Sweeping <em>k</em> (left&rarr;right) and <em>&tau;</em> (top&rarr;bottom) for MICE on FLUX.2 [klein] 4B. The
+          top row shows the source, edit masks, prompts, and the no-smoothing baseline.
+        </p>
+
+        <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem;margin-bottom:1rem;">Backbone Portability</h3>
+        <div class="content has-text-justified">
+          <p>
+            Because MICE depends on no architecture-specific layer choices, it transfers across MMDiT backbones. Applied
+            to <strong>FLUX.1 Kontext</strong>, <strong>FLUX.2 [klein] 4B / 9B</strong>, and <strong>FLUX.2-Dev</strong>,
+            it consistently improves edit locality and background preservation over each base model.
+          </p>
+        </div>
+        <figure class="image" style="max-width:860px;margin:0 auto;">
+          <img src="static/images/porting.jpg" alt="MICE applied to different backbones (FLUX.1 Kontext, FLUX.2 klein 4B/9B, FLUX.2-Dev), base vs +MICE, on LoMOE-Bench and MICE-Bench." style="border-radius:8px;"/>
+        </figure>
+        <p class="has-text-centered is-size-6" style="margin-top:0.75rem;">
+          Base model vs. <strong>+MICE</strong> across backbones, on a LoMOE-Bench (top) and a MICE-Bench (bottom) sample.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Results -->
+<section class="section">
   <div class="container is-max-desktop">
     <div class="columns is-centered">
       <div class="column is-full">
@@ -438,13 +499,29 @@
         </div>
 
         <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem;margin-bottom:1rem;">Qualitative Results</h3>
-        <figure class="image" style="margin:0 auto;">
-          <img src="static/images/qualitative.png" alt="Qualitative comparison of MICE against LoMOE, FLUX.2 and IDAttn on LoMOE-Bench and MICE-Bench." style="border-radius:8px;"/>
-        </figure>
-        <p class="has-text-centered is-size-6" style="margin-top:0.75rem;">
-          Qualitative comparison on LoMOE-Bench (top) and MICE-Bench (bottom). MICE excels at background and layout
-          preservation as well as prompt following, while baselines miss edits or distort the composition.
-        </p>
+        <div class="carousel results-carousel">
+          <div class="item">
+            <img src="static/images/qualitative.png" alt="Qualitative comparison of MICE against LoMOE, FLUX.2 and IDAttn on LoMOE-Bench and MICE-Bench."/>
+            <p class="subtitle has-text-centered">
+              LoMOE-Bench (top) and MICE-Bench (bottom). MICE excels at background and layout preservation as well as
+              prompt following, while baselines miss edits or distort the composition.
+            </p>
+          </div>
+          <div class="item">
+            <img src="static/images/lomoe_leaderboard.jpg" alt="Broader qualitative comparison on LoMOE-Bench across FLUX.2, Gemini 3 Pro, IDAttn, LayerEdit, Qwen-Image-Edit, LoMOE and MICE."/>
+            <p class="subtitle has-text-centered">
+              Broader comparison on <strong>LoMOE-Bench</strong> against the end-to-end baseline, Gemini 3 Pro Image,
+              IDAttn, LayerEdit, Qwen-Image-Edit, and LoMOE.
+            </p>
+          </div>
+          <div class="item">
+            <img src="static/images/micebench_leaderboard.jpg" alt="Broader qualitative comparison on MICE-Bench across FLUX.2, Gemini 3 Pro, IDAttn, LayerEdit, Qwen-Image-Edit, LoMOE and MICE."/>
+            <p class="subtitle has-text-centered">
+              Broader comparison on <strong>MICE-Bench</strong>, where the high edit density makes background drift and
+              missed edits in competing methods especially visible.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   </div>
