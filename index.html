@@ -1,380 +1,617 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MICE: Multi-Instance Controlled Editing</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MICE: Editing Everything Everywhere All at Once</title>
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #f5f5f5 0%, #ffffff 100%);
-            color: #333;
-            line-height: 1.6;
-        }
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 60px 20px;
-        }
+  <style>
+    body {
+      font-family: 'Noto Sans', sans-serif;
+    }
 
-        header {
-            text-align: center;
-            margin-bottom: 60px;
-            animation: fadeIn 0.6s ease-in;
-        }
+    .navbar {
+      background-color: #fff;
+      border-bottom: 1px solid #e5e5e5;
+    }
 
-        h1 {
-            font-size: 3.5rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .hero-body {
+      padding: 3rem 1.5rem 2rem;
+    }
 
-        .subtitle {
-            font-size: 1.3rem;
-            color: #666;
-            margin-bottom: 30px;
-            font-weight: 500;
-        }
+    .publication-title {
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 700;
+    }
 
-        .authors {
-            font-size: 1rem;
-            color: #555;
-            margin-bottom: 40px;
-            line-height: 1.8;
-        }
+    .publication-authors {
+      font-family: 'Google Sans', sans-serif;
+    }
 
-        .authors a {
-            color: #667eea;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
+    .author-block a {
+      color: #363636;
+    }
 
-        .authors a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
+    .author-block a:hover {
+      color: #3273dc;
+      text-decoration: underline;
+    }
 
-        .buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-bottom: 60px;
-        }
+    .publication-links .button {
+      margin: 4px;
+    }
 
-        .btn {
-            display: inline-block;
-            padding: 12px 28px;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            border: 2px solid;
-            cursor: pointer;
-        }
+    .link-block a {
+      color: inherit;
+    }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-color: #667eea;
-        }
+    .teaser .hero-body {
+      padding: 1rem 3rem 2rem;
+    }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
-        }
+    .teaser-fig img {
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
 
-        .btn-secondary {
-            background: white;
-            color: #667eea;
-            border-color: #667eea;
-        }
+    section.section {
+      padding: 3rem 1.5rem;
+    }
 
-        .btn-secondary:hover {
-            background: #f5f5f5;
-            transform: translateY(-2px);
-        }
+    .section-heading {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
 
-        .teaser {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto 60px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            animation: fadeIn 0.8s ease-in 0.2s backwards;
-        }
+    .abstract-text {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #444;
+    }
 
-        .teaser img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
+    .highlight-box {
+      background: #f8f9fa;
+      border-left: 4px solid #3273dc;
+      padding: 1.25rem 1.5rem;
+      border-radius: 0 8px 8px 0;
+      margin-bottom: 1rem;
+    }
 
-        section {
-            margin-bottom: 60px;
-            animation: fadeIn 0.6s ease-in;
-        }
+    .highlight-box p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #363636;
+    }
 
-        h2 {
-            font-size: 2rem;
-            margin-bottom: 25px;
-            color: #333;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-            display: inline-block;
-        }
+    .results-table th {
+      background-color: #f5f5f5;
+    }
 
-        .abstract {
-            background: rgba(102, 126, 234, 0.05);
-            padding: 30px;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-            font-size: 1.05rem;
-            line-height: 1.8;
-            color: #444;
-        }
+    .results-table .best {
+      font-weight: 700;
+      color: #23d160;
+    }
 
-        .contributions {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
+    .bibtex-container {
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 1.5rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      overflow-x: auto;
+      position: relative;
+      white-space: pre;
+    }
 
-        .contribution-card {
-            background: white;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-        }
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
 
-        .contribution-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
+    .mice-logo-text {
+      font-family: 'Castoro', serif;
+      font-size: 1.8rem;
+      letter-spacing: 4px;
+      color: #363636;
+    }
 
-        .contribution-card h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-        }
+    .affiliation-logos img {
+      height: 36px;
+      margin: 0 12px;
+      filter: grayscale(20%);
+    }
 
-        .contribution-card p {
-            color: #666;
-            line-height: 1.7;
-        }
+    .equal-contrib {
+      font-size: 0.85rem;
+      color: #999;
+    }
 
-        .links {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
+    .figure-caption {
+      font-size: 0.92rem;
+      color: #666;
+      margin-top: 0.75rem;
+      text-align: center;
+      line-height: 1.5;
+    }
 
-        .link-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            border-top: 3px solid #667eea;
-            transition: all 0.3s ease;
-        }
+    .navbar-more-works a {
+      font-size: 0.85rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      color: #666;
+    }
 
-        .link-card:hover {
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-        }
+    .navbar-more-works a:hover {
+      color: #3273dc;
+    }
 
-        .link-card h3 {
-            color: #333;
-            margin-bottom: 12px;
-            font-size: 1.1rem;
-        }
+    footer.footer {
+      background: #fafafa;
+      padding: 2rem 1.5rem;
+      border-top: 1px solid #e5e5e5;
+    }
 
-        .link-card a {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
+    .footer-text {
+      font-size: 0.85rem;
+      color: #aaa;
+    }
 
-        .link-card a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
+    .footer-text a {
+      color: #888;
+      text-decoration: underline;
+    }
 
-        .citation {
-            background: #f5f5f5;
-            padding: 25px;
-            border-radius: 12px;
-            font-family: 'Monaco', 'Courier New', monospace;
-            font-size: 0.9rem;
-            overflow-x: auto;
-            line-height: 1.6;
-        }
-
-        .copy-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 10px;
-            transition: background 0.3s;
-        }
-
-        .copy-btn:hover {
-            background: #764ba2;
-        }
-
-        footer {
-            text-align: center;
-            padding: 40px 0 20px;
-            color: #999;
-            font-size: 0.9rem;
-            border-top: 1px solid #eee;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2.5rem;
-            }
-
-            h2 {
-                font-size: 1.5rem;
-            }
-
-            .buttons {
-                flex-direction: column;
-            }
-
-            .btn {
-                width: 100%;
-                text-align: center;
-            }
-
-            .contributions {
-                grid-template-columns: 1fr;
-            }
-
-            .links {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    @media (max-width: 768px) {
+      .publication-title {
+        font-size: 1.8rem !important;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>MICE</h1>
-            <p class="subtitle">Multi-Instance Controlled Editing with FLUX.2</p>
-            <div class="authors">
-                <!-- Authors will be added here -->
-            </div>
-            <div class="buttons">
-                <a href="#paper" class="btn btn-primary">📄 Paper</a>
-                <a href="#code" class="btn btn-secondary">💻 Code</a>
-                <a href="#dataset" class="btn btn-secondary">📊 Dataset</a>
-                <a href="#bibtex" class="btn btn-secondary">📑 BibTeX</a>
-            </div>
-        </header>
 
-        <div class="teaser">
-            <img src="teaser.png" alt="MICE Project Teaser Image">
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand" style="padding-left:1rem;">
+    <span class="mice-logo-text" style="padding: 0.75rem 0;">MICE</span>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-end navbar-more-works" style="padding-right:1.5rem; align-items:center; display:flex; gap: 1rem;">
+      <a href="https://idattn.silviacascianelli.com" target="_blank">IDAttn</a>
+      <a href="https://eruku.carminezacc.com" target="_blank">ERUKU</a>
+      <a href="https://scam.silviacascianelli.com" target="_blank">SCAM</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero / Title -->
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">
+            Editing Everything Everywhere All at Once
+          </h1>
+          <div class="is-size-4 publication-authors" style="margin-top: 0.5rem; margin-bottom: 1rem;">
+            <span style="font-weight: 500; color: #555; letter-spacing: 1px;">MICE: Multi-Instance Concurrent Editing</span>
+          </div>
+
+          <div class="is-size-5 publication-authors" style="margin-bottom: 1rem;">
+            <span class="author-block">
+              <a href="https://scholar.google.com/search?q=Fabio+Quattrini" target="_blank">Fabio Quattrini</a><sup>*1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://carminezacc.com" target="_blank">Carmine Zaccagnino</a><sup>*1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://enis.dev" target="_blank">Enis Simsar</a><sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/search?q=Marta+Tintoré+Gazulla" target="_blank">Marta Tintoré Gazulla</a><sup>3</sup>,
+            </span>
+            <br>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=OM3sZEoAAAAJ" target="_blank">Rita Cucchiara</a><sup>1</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://scholar.google.com/citations?user=2EqXMGIAAAAJ" target="_blank">Alessio Tonioni</a><sup>3</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://silviacascianelli.com" target="_blank">Silvia Cascianelli</a><sup>1</sup>
+            </span>
+          </div>
+
+          <div class="is-size-6 equal-contrib" style="margin-bottom: 1rem;">
+            <sup>*</sup>Equal contribution, order determined by a coin flip
+          </div>
+
+          <div class="is-size-5 publication-authors" style="margin-bottom: 2rem;">
+            <span class="author-block"><sup>1</sup>University of Modena and Reggio Emilia&ensp;</span>
+            <span class="author-block"><sup>2</sup>ETH Zurich&ensp;</span>
+            <span class="author-block"><sup>3</sup>Google</span>
+          </div>
+
+          <div class="is-size-5 has-text-weight-semibold" style="margin-bottom: 2rem; color: #555;">
+            ECCV 2026
+          </div>
+
+          <div class="publication-links">
+            <span class="link-block">
+              <a href="https://arxiv.org/abs/2602.08749" target="_blank"
+                 class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fas fa-file-pdf"></i></span>
+                <span>Paper</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://arxiv.org/abs/2602.08749" target="_blank"
+                 class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="ai ai-arxiv"></i></span>
+                <span>arXiv</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://github.com/Blowing-Up-Groundhogs/mice" target="_blank"
+                 class="external-link button is-normal is-rounded is-dark">
+                <span class="icon"><i class="fab fa-github"></i></span>
+                <span>Code</span>
+              </a>
+            </span>
+            <span class="link-block">
+              <a href="https://huggingface.co/datasets/blowing-up-groundhogs/mice_bench" target="_blank"
+                 class="external-link button is-normal is-rounded is-info">
+                <span class="icon"><i class="fas fa-database"></i></span>
+                <span>MICE-Bench</span>
+              </a>
+            </span>
+          </div>
+
         </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <section id="abstract">
-            <h2>Abstract</h2>
-            <div class="abstract">
-                <!-- Abstract text will be added here -->
-            </div>
-        </section>
+<!-- Teaser -->
+<section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body has-text-centered">
+      <div class="teaser-fig">
+        <img src="static/images/teaser.png" alt="MICE teaser: multi-instance concurrent editing example showing original image, segmentation masks, edit instructions, and edited result.">
+      </div>
+      <p class="figure-caption">
+        <strong>MICE</strong> modifies the joint attention maps of MMDiT-based flow matching generative models to concurrently
+        edit multiple elements at inference time, guided by segmentation masks and per-instance text instructions.
+      </p>
+    </div>
+  </div>
+</section>
 
-        <section id="contributions">
-            <h2>Key Contributions</h2>
-            <div class="contributions">
-                <!-- Contribution cards will be added here -->
-            </div>
-        </section>
+<hr style="margin: 0 3rem;">
 
-        <section id="resources">
-            <h2>Resources</h2>
-            <div class="links">
-                <div class="link-card" id="paper">
-                    <h3>📄 Paper</h3>
-                    <p>Read the full ECCV 2026 paper</p>
-                    <a href="#">Download PDF</a>
-                </div>
-                <div class="link-card" id="code">
-                    <h3>💻 Code Repository</h3>
-                    <p>Implementation on GitHub</p>
-                    <a href="#">View on GitHub</a>
-                </div>
-                <div class="link-card" id="dataset">
-                    <h3>📊 MICE-Bench Dataset</h3>
-                    <p>Benchmark for evaluation</p>
-                    <a href="#">Access Dataset</a>
-                </div>
-            </div>
-        </section>
+<!-- Abstract -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3 section-heading">Abstract</h2>
+        <div class="content has-text-justified">
+          <p class="abstract-text">
+            Editing multiple elements of an image in a single forward pass is a practical alternative to multi-turn image
+            manipulation, offering improved efficiency and potentially better harmonization. However, when several instructions
+            target different regions, semantic interference often leads to <em>attribute leakage</em> and poor edit
+            disentanglement, especially as the number of edits increases.
+          </p>
+          <p class="abstract-text">
+            In this work, we propose <strong>MICE</strong> (Multi-Instance Concurrent Editing), a training-free strategy for
+            scalable multi-instance image editing with Multimodal Diffusion Transformers. MICE modifies the additive bias of
+            joint attention to regulate interactions between instance-specific edit instructions, latent, and context tokens
+            identified via user-provided segmentation masks. Specifically, MICE allows intra-instance attention, penalizes
+            interactions between neighboring region tokens, and suppresses unrelated cross-instance attention. As a result,
+            our method enforces attribute binding while preserving global visual consistency.
+          </p>
+          <p class="abstract-text">
+            We evaluate MICE on LoMOE-Bench and introduce <strong>MICE-Bench</strong>, a more challenging benchmark with an
+            average of 8.5 concurrent edits per image. The experiments demonstrate that our approach outperforms strong
+            baselines and recent competitors in terms of visual quality preservation and faithfulness to the editing
+            instructions.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-        <section id="bibtex">
-            <h2>Citation</h2>
-            <p>If you use MICE in your research, please cite:</p>
-            <div class="citation">
-                <pre>@inproceedings{mice2026,
-  title={MICE: Multi-Instance Controlled Editing with FLUX.2},
-  author={<!-- Authors -->},
-  booktitle={European Conference on Computer Vision (ECCV)},
-  year={2026}
-}</pre>
-            </div>
-            <button class="copy-btn" onclick="copyToClipboard()">Copy BibTeX</button>
-        </section>
+<hr style="margin: 0 3rem;">
 
-        <footer>
-            <p>&copy; 2026. Project page hosted on <a href="https://mice.silviacascianelli.com" style="color: #667eea;">mice.silviacascianelli.com</a></p>
-        </footer>
+<!-- Highlights -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Highlights</h2>
+    <div class="columns is-multiline">
+      <div class="column is-half">
+        <div class="highlight-box">
+          <p>
+            <strong>🎯 Training-free &amp; architecture-agnostic.</strong>
+            MICE requires no fine-tuning and works across multiple MMDiT-based backbones
+            (FLUX.2 klein 4B/9B, FLUX.2-Dev, FLUX.1 Kontext) without per-layer hyperparameter tuning.
+          </p>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="highlight-box">
+          <p>
+            <strong>🔒 Instance-disentangled attention.</strong>
+            A single parametric additive bias matrix replaces hard binary masking strategies,
+            achieving smooth blending while preventing attribute leakage between editing instances.
+          </p>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="highlight-box">
+          <p>
+            <strong>📊 New challenging benchmark: MICE-Bench.</strong>
+            260 samples from COCO and LVIS with 5–40 concurrent edits per image (avg. 8.5),
+            far exceeding the density of existing benchmarks such as LoMOE-Bench.
+          </p>
+        </div>
+      </div>
+      <div class="column is-half">
+        <div class="highlight-box">
+          <p>
+            <strong>⚡ Efficient scaling.</strong>
+            Unlike multi-branch methods whose memory and compute grow linearly with the number of
+            edits, MICE scales like a single-pass inference, enabling dozens of concurrent edits on a single GPU.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr style="margin: 0 3rem;">
+
+<!-- Method -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Method</h2>
+    <div class="content">
+      <p style="font-size: 1.05rem; line-height: 1.8; color: #444;">
+        MICE operates on the joint attention mechanism of Multimodal Diffusion Transformers (MMDiTs).
+        Given an input image, a set of per-instance segmentation masks, and a corresponding set of text
+        editing instructions, MICE partitions all token sequences — prompt tokens, latent tokens, and context
+        tokens — into instance-specific groups.
+      </p>
+      <p style="font-size: 1.05rem; line-height: 1.8; color: #444;">
+        The core contribution is a <strong>smoothly-disentangled additive bias matrix</strong> applied uniformly
+        across all attention layers. Each segmentation mask is smoothed by a parametric Gaussian kernel with an
+        instance-aware strategy that prevents smoothing from spilling into neighboring instances. The resulting
+        continuous values are mapped to log-probability space and used as a spatial attention penalty: tokens
+        belonging to an instance attend freely within that instance, interact with decreasing strength at nearby
+        regions (enabling smooth blending), and are prevented from attending to unrelated instances.
+      </p>
+      <p style="font-size: 1.05rem; line-height: 1.8; color: #444;">
+        This unified formulation eliminates the need to choose architecture-specific layers for hard-vs-soft
+        attention regimes, making MICE portable across different MMDiT backbones.
+      </p>
     </div>
 
-    <script>
-        function copyToClipboard() {
-            const citation = document.querySelector('.citation pre').innerText;
-            navigator.clipboard.writeText(citation).then(() => {
-                const btn = event.target;
-                const originalText = btn.innerText;
-                btn.innerText = '✓ Copied!';
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                }, 2000);
-            });
-        }
-    </script>
+    <div class="has-text-centered" style="margin-top: 2rem;">
+      <figure>
+        <img src="static/images/method.png" alt="MICE method diagram showing the bias map construction from segmentation masks and its application to the joint attention in MMDiT." style="max-width:100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.10);">
+        <figcaption class="figure-caption">
+          The MICE bias map (right) regulates interactions between background and instance-specific prompt, latent, and context tokens, using instance-aware smoothed segmentation masks as spatial guidance.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<hr style="margin: 0 3rem;">
+
+<!-- MICE-Bench -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">MICE-Bench</h2>
+    <div class="content">
+      <p style="font-size: 1.05rem; line-height: 1.8; color: #444;">
+        Existing benchmarks for multi-instance editing are limited in editing density: prior work averages
+        only 3 concurrent edits per image. To enable rigorous evaluation in high-density settings, we
+        introduce <strong>MICE-Bench</strong>:
+      </p>
+      <ul style="font-size: 1.05rem; line-height: 2; color: #444; margin-left: 1.5rem;">
+        <li><strong>260 samples</strong> sourced from the COCO and LVIS validation sets</li>
+        <li><strong>5–40 concurrent edits</strong> per image, averaging <strong>8.5 edits</strong></li>
+        <li>Annotations generated by a multimodal LLM (Gemini 3 Flash) and manually verified</li>
+        <li>Multiple annotation formats: per-instance instructions, referring expressions, and a global prompt</li>
+        <li>Compatible with both ground-truth segmentation masks and masks from an automatic segmenter (SAM3)</li>
+      </ul>
+    </div>
+    <div class="has-text-centered" style="margin-top: 1.5rem;">
+      <a href="https://huggingface.co/datasets/blowing-up-groundhogs/mice_bench" target="_blank"
+         class="button is-info is-medium is-rounded">
+        <span class="icon"><i class="fas fa-database"></i></span>
+        <span>Get MICE-Bench</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<hr style="margin: 0 3rem;">
+
+<!-- Results -->
+<section class="section">
+  <div class="container is-max-desktop">
+    <h2 class="title is-3 section-heading has-text-centered">Results</h2>
+
+    <h3 class="title is-4" style="margin-bottom: 1rem;">Comparison with the State of the Art</h3>
+    <div class="content">
+      <p style="font-size: 1.0rem; color: #555; margin-bottom: 1rem;">
+        MICE-9B (MICE applied to FLUX.2 klein 9B) outperforms all baselines in Localized CLIP score on both
+        LoMOE-Bench and MICE-Bench, including the closed-source Gemini 3 Pro Image. LLM-as-judge ELO scores
+        confirm MICE as the top-performing model in both settings.
+      </p>
+
+      <div class="table-container">
+        <table class="table is-bordered is-striped is-hoverable results-table" style="font-size: 0.9rem;">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th colspan="4" class="has-text-centered">LoMOE-Bench</th>
+              <th colspan="4" class="has-text-centered">MICE-Bench</th>
+            </tr>
+            <tr>
+              <th></th>
+              <th>Tgt C ↑</th><th>Loc C ↑</th><th>MAE<sub>B</sub> ↓</th><th>AR% ↑</th>
+              <th>Tgt C ↑</th><th>Loc C ↑</th><th>MAE<sub>B</sub> ↓</th><th>AR% ↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>FLUX.2 [klein] 9B (baseline)</td>
+              <td>26.57</td><td>29.45</td><td>8.63</td><td>99.48</td>
+              <td>25.66</td><td>26.34</td><td>27.12</td><td>100.0</td>
+            </tr>
+            <tr>
+              <td>Gemini 3 Pro Image</td>
+              <td>26.82</td><td>29.67</td><td>7.24</td><td>97.37</td>
+              <td>25.64</td><td>27.09</td><td>13.08</td><td>98.97</td>
+            </tr>
+            <tr>
+              <td>Qwen-Image-Edit</td>
+              <td>26.34</td><td>28.85</td><td>7.13</td><td>88.02</td>
+              <td>25.26</td><td>25.33</td><td>26.47</td><td>98.83</td>
+            </tr>
+            <tr>
+              <td>IDAttn</td>
+              <td>25.67</td><td>29.26</td><td>6.41</td><td>98.44</td>
+              <td>24.68</td><td>25.54</td><td>5.06</td><td>73.01</td>
+            </tr>
+            <tr>
+              <td>LoMOE</td>
+              <td>26.00</td><td>29.40</td><td>6.66</td><td>92.19</td>
+              <td>24.99</td><td>25.46</td><td>7.76</td><td>99.07</td>
+            </tr>
+            <tr>
+              <td>LayerEdit</td>
+              <td>25.61</td><td>29.07</td><td>7.43</td><td>97.92</td>
+              <td>23.77</td><td>24.38</td><td>9.32</td><td>99.51</td>
+            </tr>
+            <tr style="background: #fffbe6;">
+              <td><strong>MICE</strong> (ours)</td>
+              <td>26.49</td><td class="best">30.30</td><td>8.88</td><td>98.44</td>
+              <td>25.24</td><td class="best">27.79</td><td>13.89</td><td>98.97</td>
+            </tr>
+            <tr style="background: #fffbe6;">
+              <td><strong>MICE + SAM3</strong> (ours)</td>
+              <td>26.22</td><td class="best">30.41</td><td>8.94</td><td>96.88</td>
+              <td>25.26</td><td class="best">27.73</td><td>13.36</td><td>98.54</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3 class="title is-4" style="margin-top: 2.5rem; margin-bottom: 1rem;">LLM-as-Judge Evaluation (ELO)</h3>
+      <p style="font-size: 1.0rem; color: #555; margin-bottom: 1rem;">
+        We ran 900 binary comparisons using Gemini 3.1 Pro as a judge evaluating prompt following, background
+        preservation, and overall visual quality. MICE ranks first on both benchmarks.
+      </p>
+      <div class="table-container">
+        <table class="table is-bordered is-striped is-hoverable results-table" style="font-size: 0.9rem; max-width: 520px;">
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>LoMOE-Bench ELO ↑</th>
+              <th>MICE-Bench ELO ↑</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>FLUX.2 [klein] 9B</td><td>1299.78</td><td>1172.16</td></tr>
+            <tr><td>IDAttn</td><td>1223.57</td><td>1412.73</td></tr>
+            <tr><td>LayerEdit</td><td>887.98</td><td>858.92</td></tr>
+            <tr><td>LoMOE</td><td>1181.02</td><td>995.05</td></tr>
+            <tr><td>Qwen-Image-Edit</td><td>1265.12</td><td>1192.69</td></tr>
+            <tr style="background: #fffbe6;">
+              <td><strong>MICE</strong> (ours)</td>
+              <td class="best">1342.53</td>
+              <td class="best">1568.46</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <h3 class="title is-4" style="margin-top: 2.5rem; margin-bottom: 1rem;">Qualitative Results</h3>
+    <div class="has-text-centered">
+      <figure>
+        <img src="static/images/qualitative.png" alt="Qualitative comparison of MICE against LoMOE, FLUX.2, and IDAttn on LoMOE-Bench and MICE-Bench samples." style="max-width: 100%; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.10);">
+        <figcaption class="figure-caption">
+          Qualitative comparison on LoMOE-Bench (top row) and MICE-Bench (bottom row). MICE achieves
+          superior background preservation and instruction following compared to LoMOE, FLUX.2 baseline, and IDAttn.
+        </figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<hr style="margin: 0 3rem;">
+
+<!-- BibTeX -->
+<section class="section" id="bibtex">
+  <div class="container is-max-desktop content">
+    <h2 class="title is-3 section-heading">BibTeX</h2>
+    <p>If you use MICE or MICE-Bench in your research, please cite:</p>
+    <div style="position: relative;">
+      <div class="bibtex-container" id="bibtex-text">@inproceedings{mice2026,
+  title     = {Editing Everything Everywhere All at Once},
+  author    = {Quattrini, Fabio and Zaccagnino, Carmine and Simsar, Enis and
+               Tintor\'{e} Gazulla, Marta and Cucchiara, Rita and
+               Tonioni, Alessio and Cascianelli, Silvia},
+  booktitle = {Proceedings of the European Conference on Computer Vision (ECCV)},
+  year      = {2026}
+}</div>
+      <button class="button is-small is-light copy-btn" onclick="copyBibtex()" id="copy-btn">
+        <span class="icon"><i class="fas fa-copy"></i></span>
+        <span>Copy</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <p class="footer-text">
+        This page was built using the
+        <a href="https://github.com/eliahuhorwitz/Academic-project-page-template" target="_blank">Academic Project Page Template</a>,
+        which was adopted from the
+        <a href="https://nerfies.github.io" target="_blank">Nerfies</a> project page.
+        Licensed under <a href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank">CC BY-SA 4.0</a>.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<script>
+  function copyBibtex() {
+    const text = document.getElementById('bibtex-text').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = document.getElementById('copy-btn');
+      btn.innerHTML = '<span class="icon"><i class="fas fa-check"></i></span><span>Copied!</span>';
+      setTimeout(() => {
+        btn.innerHTML = '<span class="icon"><i class="fas fa-copy"></i></span><span>Copy</span>';
+      }, 2000);
+    });
+  }
+</script>
+
 </body>
 </html>
