@@ -438,7 +438,25 @@
       <div class="column is-full">
         <h2 class="title is-3 has-text-centered">Results</h2>
 
-        <h3 class="title is-4 has-text-centered" style="margin-bottom:1rem;">Comparison with the State of the Art</h3>
+        <h3 class="title is-4 has-text-centered" style="margin-bottom:1rem;">Qualitative Results</h3>
+        <div class="carousel results-carousel">
+          <div class="item">
+            <img src="static/images/lomoe_leaderboard.jpg" alt="Broader qualitative comparison on LoMOE-Bench across FLUX.2, Gemini 3 Pro, IDAttn, LayerEdit, Qwen-Image-Edit, LoMOE and MICE."/>
+            <p class="subtitle has-text-centered">
+              Broader comparison on <strong>LoMOE-Bench</strong> against the end-to-end baseline, Gemini 3 Pro Image,
+              IDAttn, LayerEdit, Qwen-Image-Edit, and LoMOE.
+            </p>
+          </div>
+          <div class="item">
+            <img src="static/images/micebench_leaderboard.jpg" alt="Broader qualitative comparison on MICE-Bench across FLUX.2, Gemini 3 Pro, IDAttn, LayerEdit, Qwen-Image-Edit, LoMOE and MICE."/>
+            <p class="subtitle has-text-centered">
+              Broader comparison on <strong>MICE-Bench</strong>, where the high edit density makes background drift and
+              missed edits in competing methods especially visible.
+            </p>
+          </div>
+        </div>
+
+        <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem;margin-bottom:1rem;">Comparison with the State of the Art</h3>
         <p class="has-text-centered content" style="margin-bottom:1.5rem;">
           MICE-9B (MICE on FLUX.2 klein 9B) achieves the best <strong>Localized CLIP score</strong> on both
           benchmarks &mdash; surpassing even the closed-source Gemini 3 Pro Image &mdash; and remains strong when fed
@@ -498,30 +516,6 @@
           </div>
         </div>
 
-        <h3 class="title is-4 has-text-centered" style="margin-top:2.5rem;margin-bottom:1rem;">Qualitative Results</h3>
-        <div class="carousel results-carousel">
-          <div class="item">
-            <img src="static/images/qualitative.png" alt="Qualitative comparison of MICE against LoMOE, FLUX.2 and IDAttn on LoMOE-Bench and MICE-Bench."/>
-            <p class="subtitle has-text-centered">
-              LoMOE-Bench (top) and MICE-Bench (bottom). MICE excels at background and layout preservation as well as
-              prompt following, while baselines miss edits or distort the composition.
-            </p>
-          </div>
-          <div class="item">
-            <img src="static/images/lomoe_leaderboard.jpg" alt="Broader qualitative comparison on LoMOE-Bench across FLUX.2, Gemini 3 Pro, IDAttn, LayerEdit, Qwen-Image-Edit, LoMOE and MICE."/>
-            <p class="subtitle has-text-centered">
-              Broader comparison on <strong>LoMOE-Bench</strong> against the end-to-end baseline, Gemini 3 Pro Image,
-              IDAttn, LayerEdit, Qwen-Image-Edit, and LoMOE.
-            </p>
-          </div>
-          <div class="item">
-            <img src="static/images/micebench_leaderboard.jpg" alt="Broader qualitative comparison on MICE-Bench across FLUX.2, Gemini 3 Pro, IDAttn, LayerEdit, Qwen-Image-Edit, LoMOE and MICE."/>
-            <p class="subtitle has-text-centered">
-              Broader comparison on <strong>MICE-Bench</strong>, where the high edit density makes background drift and
-              missed edits in competing methods especially visible.
-            </p>
-          </div>
-        </div>
       </div>
     </div>
   </div>
