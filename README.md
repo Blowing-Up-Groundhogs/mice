@@ -1,4 +1,4 @@
-# MICE: Multi-Instance Controlled Editing
+# MICE
 
 Code for spatially-controlled multi-instance image editing with FLUX.2-klein (4B), as evaluated on MICE-Bench and LoMOE-Bench.
 
